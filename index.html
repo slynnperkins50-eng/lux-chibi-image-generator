@@ -1,0 +1,1864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lux Chibi Image Generator</title>
+
+<style>
+:root{
+--bg:#ffd54a;
+--bg-soft:#ffdf72;
+--panel:rgba(255,220,92,0.98);
+--panel-strong:rgba(255,225,108,0.99);
+--line:rgba(17,17,17,0.24);
+--gold:#ffd54a;
+--gold-deep:#ffbf1f;
+--gold-soft:#fff8d9;
+--ink:#050505;
+--text:#0a0a0a;
+--muted:#2d2200;
+--white-soft:rgba(255,255,255,0.92);
+--shadow:0 18px 50px rgba(0,0,0,0.4);
+}
+
+*{
+box-sizing:border-box;
+}
+
+body{
+margin:0;
+font-family:"Baskerville Old Face",Georgia,"Times New Roman",serif;
+color:var(--text);
+background:var(--bg);
+min-height:100vh;
+}
+
+body::before{
+content:"";
+position:fixed;
+inset:0;
+pointer-events:none;
+background-image:
+linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+background-size:32px 32px;
+mask-image:linear-gradient(180deg, rgba(0,0,0,0.35), transparent);
+}
+
+.shell{
+width:min(100%, 1880px);
+margin:0 auto;
+padding:16px 12px 28px;
+}
+
+.hero{
+position:relative;
+overflow:hidden;
+padding:30px 32px 24px;
+border:1px solid var(--line);
+border-radius:30px;
+background:var(--panel-strong);
+box-shadow:var(--shadow);
+}
+
+.hero::after{
+content:"";
+position:absolute;
+left:0;
+right:0;
+top:0;
+height:1px;
+width:auto;
+border-radius:0;
+background:linear-gradient(90deg, transparent, rgba(255,212,74,0.7), transparent);
+}
+
+.eyebrow{
+display:inline-block;
+padding:8px 12px;
+border-radius:999px;
+border:1px solid rgba(0,0,0,0.2);
+background:rgba(255,255,255,0.62);
+font-size:12px;
+letter-spacing:0.16em;
+text-transform:uppercase;
+}
+
+h1{
+margin:12px 0 8px;
+font-size:clamp(2.6rem, 6vw, 4.9rem);
+line-height:0.98;
+letter-spacing:0.02em;
+text-shadow:none;
+color:#000000;
+font-family:"Baskerville Old Face",Georgia,"Times New Roman",serif;
+font-weight:800;
+text-transform:none;
+}
+
+.title-wrap{
+display:flex;
+flex-direction:column;
+gap:6px;
+}
+
+.title-kicker{
+font-size:0.88rem;
+letter-spacing:0.28em;
+text-transform:uppercase;
+color:#111111;
+}
+
+.hero p{
+max-width:760px;
+margin:6px 0 0;
+color:var(--muted);
+font-size:1.05rem;
+line-height:1.6;
+}
+
+.brand-signature{
+margin-top:16px;
+font-size:0.95rem;
+letter-spacing:0.08em;
+text-transform:uppercase;
+color:var(--gold-soft);
+}
+
+.brand-signature strong{
+color:#000000;
+font-weight:700;
+}
+
+.version-badge{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+margin-top:12px;
+padding:8px 14px;
+border:1px solid rgba(0,0,0,0.16);
+border-radius:999px;
+background:#ffffff;
+color:#111111;
+font-size:0.78rem;
+font-weight:800;
+letter-spacing:0.08em;
+text-transform:uppercase;
+}
+
+.layout{
+display:block;
+margin-top:22px;
+}
+
+.content-grid{
+display:grid;
+grid-template-columns:repeat(2, minmax(0, 1fr));
+gap:20px 20px;
+align-items:start;
+}
+
+.span-full{
+grid-column:1 / -1;
+}
+
+.panel{
+border:1px solid var(--line);
+border-radius:26px;
+padding:20px;
+background:var(--panel);
+box-shadow:var(--shadow);
+backdrop-filter:blur(10px);
+}
+
+.panel h2,
+.panel h3{
+margin:0 0 14px;
+font-size:1rem;
+letter-spacing:0.08em;
+text-transform:uppercase;
+}
+
+.panel h2{
+font-size:1.15rem;
+}
+
+.panel-grid{
+display:grid;
+grid-template-columns:repeat(2, minmax(0, 1fr));
+gap:14px;
+}
+
+.field{
+display:flex;
+flex-direction:column;
+gap:6px;
+}
+
+.field-wide{
+grid-column:1 / -1;
+}
+
+label{
+font-size:0.8rem;
+letter-spacing:0.08em;
+text-transform:uppercase;
+color:var(--muted);
+}
+
+select,
+input,
+textarea{
+width:100%;
+padding:13px 14px;
+border-radius:14px;
+border:1px solid rgba(0,0,0,0.16);
+background:rgba(255,255,255,0.56);
+color:var(--text);
+font:inherit;
+font-size:15px;
+}
+
+.select-native{
+position:absolute;
+opacity:0;
+pointer-events:none;
+height:0;
+width:0;
+}
+
+.visually-hidden{
+position:absolute;
+width:1px;
+height:1px;
+padding:0;
+margin:-1px;
+overflow:hidden;
+clip:rect(0, 0, 0, 0);
+white-space:nowrap;
+border:0;
+}
+
+.option-picker{
+display:grid;
+grid-template-columns:repeat(4, minmax(0, 1fr));
+gap:10px;
+margin-top:4px;
+}
+
+.option-choice{
+border:1px solid rgba(0,0,0,0.16);
+background:#ffffff;
+color:#111111;
+padding:12px 14px;
+border-radius:18px;
+text-align:left;
+font:inherit;
+font-size:0.92rem;
+font-weight:700;
+line-height:1.35;
+min-height:56px;
+box-shadow:0 10px 20px rgba(0,0,0,0.16);
+}
+
+.option-choice:hover{
+transform:translateY(-1px);
+border-color:rgba(0,0,0,0.28);
+}
+
+.option-choice.is-active{
+background:#111111;
+color:#050505;
+color:#ffffff;
+border-color:#111111;
+box-shadow:0 12px 24px rgba(0,0,0,0.18);
+}
+
+select:focus,
+input:focus,
+textarea:focus{
+outline:none;
+border-color:rgba(255,216,107,0.56);
+box-shadow:0 0 0 3px rgba(255,255,255,0.35);
+}
+
+textarea{
+min-height:170px;
+resize:vertical;
+line-height:1.55;
+}
+
+input::placeholder,
+textarea::placeholder{
+color:rgba(0,0,0,0.42);
+}
+
+.button-row{
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+margin-top:16px;
+}
+
+button{
+border:none;
+padding:12px 16px;
+border-radius:999px;
+cursor:pointer;
+font:inherit;
+font-weight:700;
+letter-spacing:0.02em;
+transition:transform 140ms ease, box-shadow 140ms ease, filter 140ms ease;
+}
+
+button:hover{
+transform:translateY(-1px);
+}
+
+.primary{
+background:#ffffff;
+color:#000000;
+box-shadow:0 10px 24px rgba(0,0,0,0.12);
+}
+
+.secondary{
+background:#ffffff;
+color:#000000;
+border:1px solid rgba(0,0,0,0.14);
+}
+
+.ghost{
+background:transparent;
+color:#111111;
+border:1px dashed rgba(0,0,0,0.28);
+}
+
+.tag-list{
+position:relative;
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+margin-top:18px;
+}
+
+.tag{
+padding:8px 10px;
+border-radius:999px;
+background:rgba(255,255,255,0.56);
+border:1px solid rgba(0,0,0,0.14);
+font-size:0.82rem;
+}
+
+.muted{
+color:var(--muted);
+}
+
+.output-header{
+display:flex;
+justify-content:space-between;
+gap:12px;
+align-items:center;
+margin-bottom:12px;
+}
+
+.status{
+min-height:22px;
+font-size:0.9rem;
+color:var(--muted);
+}
+
+.chips{
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+margin-top:12px;
+}
+
+.chip{
+padding:8px 10px;
+border-radius:999px;
+background:rgba(255,255,255,0.5);
+font-size:0.82rem;
+}
+
+.option-board{
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+margin-top:14px;
+}
+
+.option-pill{
+display:inline-flex;
+align-items:center;
+gap:8px;
+padding:10px 14px;
+border-radius:999px;
+border:1px solid rgba(0,0,0,0.14);
+background:#ffffff;
+color:#050505;
+font-size:0.84rem;
+font-weight:700;
+box-shadow:0 8px 18px rgba(255,179,0,0.18);
+}
+
+.option-pill strong{
+color:#050505;
+}
+
+.option-pill span{
+color:#201400;
+}
+
+.option-empty{
+padding:12px 14px;
+border-radius:16px;
+border:1px dashed rgba(0,0,0,0.2);
+background:rgba(255,255,255,0.36);
+color:var(--muted);
+}
+
+.builder-stack{
+display:grid;
+grid-template-columns:repeat(2, minmax(0, 1fr));
+gap:18px 18px;
+}
+
+.builder-card{
+padding:16px;
+border-radius:22px;
+border:1px solid rgba(0,0,0,0.14);
+background:rgba(255,235,148,0.9);
+align-self:start;
+}
+
+.vibe-grid{
+display:grid;
+grid-template-columns:repeat(5, minmax(0, 1fr));
+gap:14px;
+}
+
+.vibe-card{
+padding:18px 14px;
+min-height:96px;
+border-radius:20px;
+border:1px solid rgba(0,0,0,0.14);
+background:#ffffff;
+text-align:center;
+color:#111111;
+}
+
+.vibe-card.is-active{
+background:#111111;
+color:#ffffff;
+border-color:#111111;
+box-shadow:0 12px 24px rgba(0,0,0,0.2);
+}
+
+.vibe-emoji{
+display:block;
+font-size:1.6rem;
+margin-bottom:8px;
+}
+
+.vibe-title{
+display:block;
+font-weight:700;
+font-size:0.98rem;
+}
+
+.vibe-subtitle{
+display:block;
+margin-top:4px;
+font-size:0.82rem;
+opacity:0.9;
+}
+
+.builder-card h3{
+margin:0 0 12px;
+font-size:0.95rem;
+letter-spacing:0.08em;
+text-transform:uppercase;
+color:#111111;
+}
+
+.multi-note{
+margin:-4px 0 12px;
+font-size:0.82rem;
+letter-spacing:0.04em;
+text-transform:uppercase;
+color:#3a2b00;
+opacity:0.9;
+}
+
+.builder-choices{
+display:grid;
+grid-template-columns:repeat(4, minmax(0, 1fr));
+gap:10px;
+}
+
+.builder-chip{
+border:1px solid rgba(0,0,0,0.14);
+background:#ffffff;
+color:#111111;
+padding:10px 14px;
+border-radius:999px;
+font:inherit;
+font-size:0.92rem;
+font-weight:700;
+line-height:1.25;
+text-align:center;
+}
+
+.builder-chip:hover{
+transform:translateY(-1px);
+}
+
+.builder-chip.is-active{
+background:#111111;
+color:#ffffff;
+border-color:#111111;
+box-shadow:0 10px 20px rgba(0,0,0,0.18);
+}
+
+.builder-chip.is-disabled{
+background:#f1f1f1;
+color:#777777;
+border-color:rgba(0,0,0,0.08);
+box-shadow:none;
+cursor:not-allowed;
+opacity:0.7;
+}
+
+.builder-chip.is-disabled:hover{
+transform:none;
+}
+
+.restriction-note{
+display:none;
+margin:0 0 10px;
+font-size:0.82rem;
+font-weight:700;
+color:#5b4500;
+}
+
+.restriction-note.is-visible{
+display:block;
+}
+
+.builder-add{
+display:flex;
+gap:10px;
+margin-top:12px;
+}
+
+.builder-add input{
+flex:1;
+}
+
+.builder-add button{
+white-space:nowrap;
+}
+
+.helper{
+margin:8px 0 0;
+font-size:0.9rem;
+line-height:1.5;
+color:var(--muted);
+}
+
+.mini-note{
+margin-top:10px;
+font-size:0.92rem;
+color:var(--muted);
+line-height:1.55;
+}
+
+.footer{
+padding:28px 0 8px;
+text-align:center;
+color:rgba(0,0,0,0.7);
+letter-spacing:0.14em;
+text-transform:uppercase;
+font-size:0.76rem;
+}
+
+.button-row button{
+min-height:48px;
+}
+
+.output-header button{
+flex:0 0 auto;
+}
+
+@media (max-width: 980px){
+.content-grid{
+grid-template-columns:1fr;
+gap:18px;
+}
+
+.builder-stack{
+grid-template-columns:1fr;
+}
+
+.vibe-grid{
+grid-template-columns:repeat(2, minmax(0, 1fr));
+}
+
+.builder-choices,
+.option-picker{
+grid-template-columns:repeat(2, minmax(0, 1fr));
+}
+}
+
+@media (max-width: 640px){
+.shell{
+padding:14px 12px 28px;
+}
+
+.hero{
+padding:18px 15px 16px;
+border-radius:22px;
+}
+
+.panel{
+padding:16px;
+border-radius:20px;
+}
+
+h1{
+margin:14px 0 8px;
+font-size:clamp(2rem, 12vw, 3rem);
+line-height:0.98;
+}
+
+.title-kicker{
+font-size:0.74rem;
+letter-spacing:0.18em;
+}
+
+.vibe-grid,
+.builder-choices,
+.option-picker{
+grid-template-columns:1fr;
+}
+
+.hero p{
+max-width:34rem;
+font-size:0.96rem;
+line-height:1.5;
+}
+
+.panel-grid{
+grid-template-columns:1fr;
+gap:12px;
+}
+
+.option-picker{
+grid-template-columns:1fr;
+}
+
+.builder-add{
+flex-direction:column;
+}
+
+.vibe-grid{
+grid-template-columns:1fr;
+}
+
+select,
+input,
+textarea{
+font-size:16px;
+}
+
+textarea{
+min-height:150px;
+}
+
+.button-row button,
+.output-header button{
+width:100%;
+}
+
+.output-header{
+flex-direction:column;
+align-items:flex-start;
+margin-bottom:10px;
+}
+
+.tag-list,
+.chips{
+gap:6px;
+}
+
+.tag,
+.chip{
+padding:7px 9px;
+font-size:0.78rem;
+}
+
+.footer{
+padding:22px 6px 6px;
+font-size:0.68rem;
+letter-spacing:0.1em;
+}
+}
+
+@media (max-width: 400px){
+.shell{
+padding:10px 10px 24px;
+}
+
+.hero,
+.panel{
+border-radius:18px;
+}
+
+button{
+padding:12px 14px;
+}
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="shell">
+<section class="hero">
+<span class="eyebrow">Prompt Atelier</span>
+<div class="title-wrap">
+<span class="title-kicker">Glamorous Luxury Creator</span>
+<h1>Lux Chibi Image Generator</h1>
+</div>
+<p>Build glossy, high-fashion chibi prompts with a live luxury character preview, ready-to-copy variations, and a short cinematic video beat for reels, shorts, or image-to-video tools.</p>
+<div class="brand-signature">Designed by <strong>Glo Sis Designs / Shenetria Perkins</strong></div>
+<div class="version-badge">Version 1 Stable Build</div>
+</section>
+
+<div class="layout">
+<main class="content-grid">
+<section class="panel">
+<h2>Instant Vibe Creator</h2>
+<div class="vibe-grid" id="vibeGrid"></div>
+</section>
+
+<section class="panel span-full">
+<div class="output-header">
+<h2>Character Builder</h2>
+<button class="secondary" type="button" onclick="clearAll()">Reset All</button>
+</div>
+<p class="helper">The builder now follows your exact step-by-step order so it is easier to build the character from overall type down to the final scene. Choose what you want, skip what you do not, or add your own custom choice in any group.</p>
+<div class="builder-stack" id="builderGroups"></div>
+</section>
+
+<div class="visually-hidden" aria-hidden="true">
+<select id="ratio">
+<option>None</option>
+<option>1:1</option>
+<option>4:5</option>
+<option>9:16</option>
+<option>16:9</option>
+</select>
+<select id="style">
+<option>None</option>
+<option>Glossy chibi luxury</option>
+<option>High fashion chibi</option>
+<option>Luxury doll render</option>
+<option>Neon glam chibi</option>
+</select>
+<select id="renderMode">
+<option>None</option>
+<option>Toy-box render</option>
+<option>Ultra-editorial beauty</option>
+<option>Street-lux campaign</option>
+<option>Animated 3D doll realism</option>
+<option>High-gloss studio campaign</option>
+<option>Luxury product-ad poster</option>
+<option>Fashion magazine cover</option>
+<option>Cinematic glam portrait</option>
+</select>
+<select id="bg">
+<option>None</option>
+<option>Luxury shopping mall</option>
+<option>Runway stage</option>
+<option>Pink glam studio</option>
+<option>Gold aesthetic</option>
+</select>
+<select id="lighting">
+<option>None</option>
+<option>Soft glow</option>
+<option>Studio lighting</option>
+<option>Golden hour</option>
+<option>Neon glam</option>
+</select>
+<select id="camera">
+<option>None</option>
+<option>Full body front</option>
+<option>Low angle</option>
+<option>Runway walk</option>
+<option>Dynamic tilt</option>
+</select>
+<select id="mood">
+<option>None</option>
+<option>Confident</option>
+<option>Playful</option>
+<option>Regal</option>
+<option>Fierce</option>
+<option>Dreamy</option>
+</select>
+</div>
+
+<section class="panel">
+<h2>Additional Options</h2>
+<div class="field field-wide">
+<label for="customOptions">Extra Prompt Details</label>
+<textarea id="customOptions" placeholder="Add anything extra here: skin tone, facial expression, prop, text style, glitter level, specific colors, brand-inspired fashion, environment details, or anything else you want included."></textarea>
+<p class="helper">Anything typed here gets added directly into the generated prompt and can be used for custom model instructions. If you still want things like cosplay, baby props, fantasy elements, crown effects, companion pets, holiday themes, or props, add them here.</p>
+</div>
+<div class="field field-wide">
+<label>Selected Options</label>
+<div class="option-board" id="selectedOptions">
+<div class="option-empty">Your chosen and typed options will appear here.</div>
+</div>
+</div>
+</section>
+
+<section class="panel">
+<div class="output-header">
+<h2>Prompt Output</h2>
+</div>
+<div class="button-row">
+<button class="primary" type="button" onclick="generate()">Generate Prompt</button>
+<button class="secondary" type="button" onclick="randomize()">Random Luxe Build</button>
+<button class="secondary" type="button" onclick="variations()">3 Variations</button>
+<button class="secondary" type="button" onclick="copyPrompt()">Copy Prompt</button>
+<button class="secondary" type="button" onclick="clearAll()">Reset All</button>
+</div>
+<textarea id="output" placeholder="Your polished image prompt appears here."></textarea>
+<div class="chips" id="promptChips"></div>
+</section>
+
+<section class="panel span-full">
+<div class="output-header">
+<h2>15 Second Video Script</h2>
+<button class="secondary" type="button" onclick="copyVideo()">Copy Video</button>
+</div>
+<textarea id="video" placeholder="A 15-second image-to-video script appears here."></textarea>
+<p class="mini-note">The longer video beat adapts to your selected mood, lighting, camera angle, and styling details.</p>
+</section>
+</main>
+</div>
+
+<div class="visually-hidden" aria-hidden="true">
+<div id="previewName">Lux Character Preview</div>
+<div id="previewSummary">Choose a few details and the character profile will update in real time.</div>
+<div id="previewTags"></div>
+<div id="previewPulse">Soft glam energy with a glossy editorial finish.</div>
+<div id="status">Ready to build.</div>
+</div>
+
+<div class="footer">
+all rights reserved by Glo Sis Designs / Shenetria Perkins
+<br>Version 1 Stable Build
+</div>
+</div>
+
+<script>
+const styles = ["Glossy chibi luxury","High fashion chibi","Luxury doll render","Neon glam chibi"];
+const renderModes = ["Toy-box render","Ultra-editorial beauty","Street-lux campaign","Animated 3D doll realism","High-gloss studio campaign","Luxury product-ad poster","Fashion magazine cover","Cinematic glam portrait"];
+const bgs = ["Luxury shopping mall","Runway stage","Pink glam studio","Gold aesthetic"];
+const lights = ["Soft glow","Studio lighting","Golden hour","Neon glam"];
+const cameras = ["Full body front","Low angle","Runway walk","Dynamic tilt"];
+const moods = ["Confident","Playful","Regal","Fierce","Dreamy"];
+const detailOptions = ["glossy lips","long wispy lashes","radiant skin","jeweled nails","sparkle aura","high-shine finish"];
+let activeVibe = "";
+const cartoonTypePrompts = {
+"exaggerated chibi style":", exaggerated chibi style, very large head, tiny body, cute toy-like proportions, simplified limbs, expressive face",
+"18k digital illustration":", ultra-detailed digital illustration, crisp polished edges, high-resolution painted detail, clean premium digital art finish",
+"gouache mixed with watercolor":", gouache and watercolor painting style, soft blended pigment, visible brush texture, painterly edges, illustrated paper-art feel",
+"cgi caricature":", CGI caricature style, exaggerated facial features, dimensional 3D cartoon form, sculpted render, playful stylized proportions",
+"hyper realistic illustration":", hyper realistic illustration, realistic skin and fabric detail, painted realism, polished portrait illustration finish",
+"fashion doll inspired":", fashion doll inspired style, oversized almond eyes, defined lashes, stylized doll-face proportions, trend-forward character design",
+"hyper realistic fashion doll":", hyper realistic fashion doll look, glossy doll skin, enlarged eyes, stylized lips, realistic lighting with doll-like facial proportions",
+"chibi mixed with fashion doll":", hybrid chibi and fashion doll style, oversized chibi head with doll-like eyes and lips, cute but stylish proportions",
+"semi realism 4k fashion doll style":", semi-realistic fashion doll style, doll-like face, smooth skin, enhanced eyes and lips, clean 4k polished finish",
+"hand-drawn cartoon":", hand-drawn cartoon style, clean sketch and ink outlines, stylized 2D character drawing, illustrated cartoon finish",
+"high gloss chibi":", high gloss chibi style, shiny polished surfaces, lacquered finish, reflective highlights, collectible character look",
+"glossy 3d chibi illustration":", glossy 3D chibi style, smooth rendered materials, rounded toy-like volume, soft 3D lighting, polished CGI look",
+"coloring page image":", coloring page style, black-and-white line art, thick clean outlines, bold contour lines, empty fill areas, printable character page look",
+"anime style illustration":", anime-inspired illustration style, large expressive anime eyes, small anime nose, simplified anime mouth, sharp clean line art, flat cel shading, stylized 2D anime finish, stylized anime face design, pointed anime hair clumps, dynamic illustrated silhouette",
+"stylized animated film 3d render":", stylized animated film render, soft 3D shapes, expressive face, family-animation look, polished character rendering",
+"retro vintage cartoon":", retro vintage cartoon style, nostalgic character shapes, classic old-school illustration feel, vintage animated charm",
+"graphic comic illustration":", graphic comic illustration style, thick black ink outlines, bold contour work, graphic cel shading, halftone dot texture, illustrated panel energy, dramatic shadow blocks, high-contrast comic coloring, hand-inked comic linework"
+};
+const instantVibes = [
+{ key:"glamPrincess", emoji:"👑", title:"Lux Glam Princess", subtitle:"Elegant & royal", mood:"Regal", renderMode:"Fashion magazine cover", style:"Luxury doll render", bg:"Gold aesthetic", builder:{ cartoonStyleBuilder:"hyper realistic fashion doll", outfitBuilder:"princess dress", poseAction:"hand on hip", accessoriesBuilder:["designer handbag"], jewelryDetails:["statement earrings"], typography:["elegant serif title"] } },
+{ key:"streetStyle", emoji:"🎨", title:"Lux Street Style", subtitle:"Urban & trendy", mood:"Fierce", renderMode:"Street-lux campaign", style:"High fashion chibi", bg:"Luxury shopping mall", builder:{ cartoonStyleBuilder:"hand-drawn cartoon", outfitBuilder:"glam streetwear", shoesBuilder:"designer high-top sneakers", accessoriesBuilder:["crossbody bag"], poseAction:"walking with attitude", typography:["block lettering"] } },
+{ key:"gamerVibe", emoji:"🎮", title:"Lux Gamer Vibe", subtitle:"Cool & casual", mood:"Playful", renderMode:"Animated 3D doll realism", style:"Neon glam chibi", bg:"Pink glam studio", builder:{ cartoonStyleBuilder:"stylized animated film 3d render", outfitBuilder:"hoodie and sweatpants", accessoriesBuilder:["headphones"], poseAction:"sitting cross-legged", typography:["rounded font"] } },
+{ key:"kawaiiCute", emoji:"🌸", title:"Lux Kawaii Cute", subtitle:"Sweet & pastel", mood:"Dreamy", renderMode:"Toy-box render", style:"Glossy chibi luxury", bg:"Pink glam studio", builder:{ cartoonStyleBuilder:"exaggerated chibi style", outfitBuilder:"colorful romper", accessoriesBuilder:["hair bow"], poseAction:"peace sign", typography:["bubble text"] } },
+{ key:"bossBabe", emoji:"💼", title:"Lux Boss Babe", subtitle:"Fierce & fabulous", mood:"Confident", renderMode:"High-gloss studio campaign", style:"High fashion chibi", bg:"Gold aesthetic", builder:{ cartoonStyleBuilder:"semi realism 4k fashion doll style", outfitBuilder:"business attire", accessoriesBuilder:["designer handbag"], jewelryDetails:["diamond studs"], poseAction:"arms crossed", typography:["bold editorial headline"] } },
+{ key:"glamDiva", emoji:"✨", title:"Lux Glam Diva", subtitle:"Luxe & dramatic", mood:"Regal", renderMode:"Ultra-editorial beauty", style:"Glossy chibi luxury", bg:"Runway stage", builder:{ cartoonStyleBuilder:"high gloss chibi", outfitBuilder:"sequined cocktail dress", shoesBuilder:"blinged heels", jewelryDetails:["statement earrings"], poseAction:"hand on hip", typography:["script lettering"] } },
+{ key:"sportyStar", emoji:"⚽", title:"Lux Sporty Star", subtitle:"Athletic & active", mood:"Playful", renderMode:"High-gloss studio campaign", style:"Neon glam chibi", bg:"Luxury shopping mall", builder:{ cartoonStyleBuilder:"glossy 3d chibi illustration", bodyType:"athletic", outfitBuilder:"basketball jersey", shoesBuilder:"sporty sneakers", poseAction:"jumping", typography:["varsity font"] } },
+{ key:"cozyQueen", emoji:"☁️", title:"Lux Cozy Queen", subtitle:"Comfy & chill", mood:"Dreamy", renderMode:"Cinematic glam portrait", style:"Glossy chibi luxury", bg:"Gold aesthetic", builder:{ cartoonStyleBuilder:"hand-drawn cartoon", outfitBuilder:"oversized cozy sweater with leggings", shoesBuilder:"fuzzy slippers", poseAction:"sitting cross-legged", typography:["soft girly script"] } },
+{ key:"partyReady", emoji:"🎉", title:"Lux Party Ready", subtitle:"Fun & festive", mood:"Confident", renderMode:"Luxury product-ad poster", style:"Neon glam chibi", bg:"Pink glam studio", builder:{ cartoonStyleBuilder:"high gloss chibi", outfitBuilder:"sparkly mini dress", shoesBuilder:"blinged heels", poseAction:"dancing", typography:["chrome metallic letters"] } },
+{ key:"y2kVibes", emoji:"🌺", title:"Lux Y2K Vibes", subtitle:"Retro & bold", mood:"Fierce", renderMode:"Fashion magazine cover", style:"High fashion chibi", bg:"Pink glam studio", builder:{ cartoonStyleBuilder:"fashion doll inspired", outfitBuilder:"designer top with denim jeans", shoesBuilder:"platform sneakers", accessoriesBuilder:["oversized sunglasses"], poseAction:"throwing up heart sign", typography:["bubble lettering"] } },
+{ key:"edgyAlt", emoji:"🖤", title:"Lux Edgy Alt", subtitle:"Dark & cool", mood:"Fierce", renderMode:"Cinematic glam portrait", style:"Neon glam chibi", bg:"Runway stage", builder:{ cartoonStyleBuilder:"graphic comic illustration", outfitBuilder:"leather jacket with ripped jeans", shoesBuilder:"combat boots", accessoriesBuilder:["headphones"], poseAction:"leaning against wall", typography:["gothic blackletter font"] } },
+{ key:"sweetBaby", emoji:"👶", title:"Lux Sweet Baby", subtitle:"Adorable & tiny", mood:"Dreamy", renderMode:"Toy-box render", style:"Luxury doll render", bg:"Gold aesthetic", builder:{ cartoonStyleBuilder:"stylized animated film 3d render", ageGroup:"baby", bodyType:"small and cute", outfitBuilder:"cute onesie", shoesBuilder:"just socks", poseAction:"facial focus", typography:["soft rounded bubbly letters"] } },
+{ key:"superHero", emoji:"🦸", title:"Lux Super Hero", subtitle:"Powerful & brave", mood:"Confident", renderMode:"Luxury product-ad poster", style:"High fashion chibi", bg:"Runway stage", builder:{ cartoonStyleBuilder:"graphic comic illustration", outfitBuilder:"superhero costume", poseAction:"pointing at camera", typography:["bold cartoon lettering"] } },
+{ key:"magicalGirl", emoji:"🧚", title:"Lux Magical Girl", subtitle:"Enchanting & mystical", mood:"Dreamy", renderMode:"Ultra-editorial beauty", style:"Glossy chibi luxury", bg:"Pink glam studio", builder:{ cartoonStyleBuilder:"anime style illustration", outfitBuilder:"tutu dress", accessoriesBuilder:["hair bow"], poseAction:"full body", eyeStyleEffects:"star eyes", typography:["script lettering"] } }
+];
+const builderGroupsConfig = [
+{ key:"cartoonStyleBuilder", label:"Cartoon Type", options:["exaggerated chibi style","18k digital illustration","gouache mixed with watercolor","cgi caricature","hyper realistic illustration","fashion doll inspired","hyper realistic fashion doll","chibi mixed with fashion doll","semi realism 4k fashion doll style","hand-drawn cartoon","high gloss chibi","glossy 3d chibi illustration","coloring page image","anime style illustration","stylized animated film 3d render","retro vintage cartoon","graphic comic illustration"] },
+{ key:"genderBuilder", label:"Gender", options:["female","male"] },
+{ key:"ageGroup", label:"Age Group", options:["baby","toddler","child","preteen","adolescent","teenager","young adult","adult","middle-aged","elderly"] },
+{ key:"nationality", label:"Nationality / Ethnicity", options:["african american","caucasian","south asian","hispanic/latino","native american","middle eastern","european","arab","han chinese","mexican"] },
+{ key:"skinTone", label:"Skin Tone", options:["pale","light brown","medium brown","dark brown","caramel","golden honey","dark ebony","deep chocolate"] },
+{ key:"bodyType", label:"Body Type", options:["slim","athletic","curvy","plus-size","muscular","petite","tall and lean","toned","chubby","small and cute","tiny","short and stocky","lanky","round and soft","slim thick","thick sexy"] },
+{ key:"hairStyleBuilder", label:"Hairstyle", options:["long straight","curly","loose wave","body wave","messy bun","side ponytail","cornrows","knotless braids","blunt bob","bald","space buns","pixie cut","half up half down","voluminous curls","high ponytail","tight curls","big afro","baby hairs","anime hair","side ponytail with baby hairs","messy bun with baby hairs","braided ponytail","low haircut","taper haircut","long dreadlocks","short dreadlocks","senegalese twists"] },
+{ key:"hairColor", label:"Hair Color", options:["jet black","soft black","dark brown","medium brown","light brown","honey blonde","platinum blonde","gold blonde","ginger","auburn","burgundy","copper","silver","gray","ombre blonde","black with blonde highlights","brown with caramel highlights","pink","blue","red"] },
+{ key:"eyeColor", label:"Eye Color", options:["dark brown","brown","hazel","amber","honey","green","light green","blue","ice blue","gray","violet","black"] },
+{ key:"eyeStyleEffects", label:"Eye Style", options:["normal expressive eyes","graffiti \"XX\" marks","heart-shaped eyes","star eyes","closed eyes with lashes","glowing neon eyes","heterochromia","anime sparkle eyes","dollar sign eyes","spiral hypnotic eyes","cat-like slit eyes","teary emotional eyes"] },
+{ key:"makeupStyle", label:"Makeup Style", options:["natural","glam bold lips","smokey eye","glittery eyeshadow","winged eyeliner","no makeup","cut crease","graphic liner","glossy dewy skin","matte full coverage","soft pink blush","contoured cheekbones","dramatic cat eye","nude lips with highlight","bold colored eyeliner","glitter lip gloss","bronzed sun-kissed glow","faux freckles"] },
+{ key:"facialFeatures", label:"Facial Features", options:["freckles","dimples","beauty mark","glasses","full lips","high cheekbones","button nose","sharp jawline","pouting glam lips"] },
+{ key:"expressionMood", label:"Expression / Mood", options:["happy smile","confident smirk","playful wink","serious face","surprised expression","sleepy eyes","sassy attitude","mysterious look","excited energy","calm demeanor","pouty lips","laughing"] },
+{ key:"colorPalette", label:"Color Palette", options:["pastel colors","vibrant colors","monochrome","earth tones","neutral browns","black and white","pink palette","rainbow palette","neon colors","jewel tones","candy colors","muted vintage","warm sunset tones"] },
+{ key:"outfitBuilder", label:"Outfit", options:["glam streetwear","hoodie and sweatpants","designer top with denim jeans","sparkly mini dress","tracksuit","business attire","oversized cozy sweater with leggings","leather jacket with ripped jeans","t-shirt with dark jeans","crop top with cargo pants","satin pajama set","bomber jacket with joggers","tuxedo","baseball jersey","basketball jersey","puffer coat with jeans","tank top with baggy jeans","cute onesie","colorful romper","overalls with t-shirt","tutu dress","superhero costume","princess dress","denim jacket with shorts","striped shirt with leggings","dinosaur pajamas","rainbow hoodie","animal print dress","dungarees","sequined cocktail dress","velvet bodycon dress","silk slip dress with blazer","distressed boyfriend jeans with graphic tee","linen button-up with chino shorts","oversized denim jacket with sundress","designer outfit with designer shoes"] },
+{ key:"shoesBuilder", label:"Shoes", options:["nike sneakers","sporty sneakers","fuzzy slippers","stiletto heels","workwear boots","rain boots","lace up sneakers","high top sneakers","cushioned sneakers","designer high-top sneakers","dressy shoes","open toe sandals","blinged heels","cozy shearling boots","just socks","barefoot","light-up sneakers","velcro strap shoes","mary jane shoes","cowboy boots","platform sneakers","combat boots","thigh high boots","strap sandals"] },
+{ key:"accessoriesBuilder", label:"Accessories", options:["oversized sunglasses","gold hoop earrings","designer handbag","baseball cap","chunky necklace","headphones","beanie","smartwatch","crossbody bag","backpack","bucket hat","visor","scarf","belt bag","tote bag","clutch purse","durag","hair bow"] },
+{ key:"jewelryDetails", label:"Jewelry Details", options:["chunky gold chains","delicate necklaces","statement earrings","multiple rings","anklets","body chains","diamond studs","layered bracelets","choker necklace","pendant necklace","nose ring","no jewelry","clover necklace","clover bracelet","clover anklet"] },
+{ key:"poseAction", label:"Pose", options:["hand on hip","sitting cross-legged","jumping","peace sign","dancing","taking selfie","leaning against wall","arms crossed","blowing a kiss","walking with attitude","pointing at camera","throwing up heart sign","full body","facial focus"] },
+{ key:"backgroundBuilder", label:"Background", options:["transparent","solid white background","solid baby pink background","birthday scene with balloons","basketball game","football game","luxury bedroom","school hallway","the park during daytime","shopping mall","nyc skyline","next to a luxury car","graffiti background","beach with sand","dreamy pastel gradient with soft clouds","church"] },
+{ key:"typography", label:"Typography", options:["luxury script text","bold editorial headline","soft girly script","elegant serif title","glossy chrome lettering","diamond sparkle text","handwritten glam text","runway magazine typography","gold foil text","minimal clean text","bubble text","bubble lettering","graffiti lettering","script lettering","varsity font","rounded font","block lettering","dripping slime letters","puffy inflated font","bold cartoon lettering","retro groovy font","shadow stroke font","stencil lettering","wavy wiggly letters","chrome metallic letters","distressed bold font","calligraphy elegant font","futuristic tech font","hand-drawn sketchy letters","punk rock jagged letters","soft rounded bubbly letters","artistic brush stroke font","angular geometric font","playful wobbly letters","ornate decorative font","minimalist clean font","gothic blackletter font","3D extruded letters","outline hollow letters","striped pattern letters","gradient flowing font"] },
+{ key:"specialNeed", label:"Special Need", options:["wheelchair user","walker support","cane support","hearing aid","cochlear implant","prosthetic leg","prosthetic arm","visual impairment support","sensory-friendly styling","adaptive fashion","service dog","inclusive pose support"] },
+{ key:"tattoosBodyArt", label:"Body Art / Tattoos", options:["face tattoos","neck tattoos","arm sleeve tattoos","minimalist line tattoos","no tattoos","chest tattoos","hand tattoos","leg tattoos","back tattoos","tribal tattoos","floral tattoos","geometric tattoos"] },
+];
+const multiSelectBuilderKeys = new Set(["makeupStyle","facialFeatures","accessoriesBuilder","jewelryDetails","typography"]);
+const builderState = Object.fromEntries(builderGroupsConfig.map((group) => [group.key, multiSelectBuilderKeys.has(group.key) ? [] : ""]));
+const childRestrictedOptions = {
+bodyType: new Set(["slim thick","thick sexy","curvy","plus-size"]),
+makeupStyle: new Set(["glam bold lips","smokey eye","cut crease","dramatic cat eye","nude lips with highlight","glitter lip gloss","bronzed sun-kissed glow","contoured cheekbones"]),
+facialFeatures: new Set(["pouting glam lips"]),
+outfitBuilder: new Set(["sparkly mini dress","crop top with cargo pants","sequined cocktail dress","velvet bodycon dress","silk slip dress with blazer"]),
+shoesBuilder: new Set(["stiletto heels","blinged heels","thigh high boots","open toe sandals"]),
+jewelryDetails: new Set(["body chains","nose ring","choker necklace"])
+};
+const teenRestrictedOptions = {
+bodyType: new Set(["thick sexy"]),
+facialFeatures: new Set(["pouting glam lips"])
+};
+
+const fieldIds = ["ratio","style","renderMode","bg","lighting","camera","mood","customOptions"];
+const visualSelectIds = ["ratio","style","renderMode","bg","lighting","camera","mood"];
+
+function getValue(id){
+const node = document.getElementById(id);
+if(!node) return "";
+return node.value.trim();
+}
+
+function getBuilderValue(...keys){
+for(const key of keys){
+const value = builderState[key];
+if(Array.isArray(value) ? value.length : value) return Array.isArray(value) ? value.join(", ") : value;
+}
+return "";
+}
+
+function getJoinedBuilderValues(keys){
+return keys
+.flatMap((key) => {
+const value = builderState[key];
+return Array.isArray(value) ? value : [value];
+})
+.filter(Boolean)
+.join(", ");
+}
+
+function displayBuilderValue(value){
+if(Array.isArray(value)) return value.join(", ");
+return value || "";
+}
+
+function syncVisualPicker(select){
+const picker = document.querySelector("[data-picker-for=\"" + select.id + "\"]");
+if(!picker) return;
+picker.querySelectorAll(".option-choice").forEach((button) => {
+button.classList.toggle("is-active", button.dataset.value === select.value);
+});
+}
+
+function buildVisualPickers(){
+visualSelectIds.forEach((id) => {
+const select = document.getElementById(id);
+if(!select || document.querySelector("[data-picker-for=\"" + id + "\"]")) return;
+
+select.classList.add("select-native");
+const picker = document.createElement("div");
+picker.className = "option-picker";
+picker.dataset.pickerFor = id;
+
+Array.from(select.options).forEach((option) => {
+const button = document.createElement("button");
+button.type = "button";
+button.className = "option-choice";
+button.textContent = option.textContent;
+button.dataset.value = option.value;
+button.addEventListener("click", () => {
+select.value = select.value === option.value ? "None" : option.value;
+select.dispatchEvent(new Event("change", { bubbles:true }));
+});
+picker.appendChild(button);
+});
+
+select.insertAdjacentElement("afterend", picker);
+syncVisualPicker(select);
+select.addEventListener("change", () => syncVisualPicker(select));
+});
+}
+
+function getRestrictedSet(groupKey, ageMode){
+if(ageMode === "child") return childRestrictedOptions[groupKey] || new Set();
+if(ageMode === "teen") return teenRestrictedOptions[groupKey] || new Set();
+return new Set();
+}
+
+function isBuilderOptionRestricted(groupKey, value, ageMode){
+return getRestrictedSet(groupKey, ageMode).has(value);
+}
+
+function enforceAgeSafetyOnBuilder(){
+const ageMode = getAgeMode(builderState.ageGroup || "");
+builderGroupsConfig.forEach((group) => {
+const restrictedSet = getRestrictedSet(group.key, ageMode);
+if(multiSelectBuilderKeys.has(group.key)){
+builderState[group.key] = (builderState[group.key] || []).filter((value) => !restrictedSet.has(value));
+}else if(restrictedSet.has(builderState[group.key])){
+builderState[group.key] = "";
+}
+});
+}
+
+function syncBuilderUI(){
+const ageMode = getAgeMode(builderState.ageGroup || "");
+document.querySelectorAll(".builder-card").forEach((card) => {
+const groupKey = card.dataset.builderGroup;
+const groupValue = builderState[groupKey];
+const restrictedSet = getRestrictedSet(groupKey, ageMode);
+card.querySelectorAll(".builder-chip").forEach((button) => {
+const isActive = Array.isArray(groupValue)
+? groupValue.includes(button.dataset.value)
+: button.dataset.value === groupValue;
+const isRestricted = restrictedSet.has(button.dataset.value);
+button.classList.toggle("is-active", isActive);
+button.classList.toggle("is-disabled", isRestricted);
+button.disabled = isRestricted;
+});
+const restrictionNote = card.querySelector(".restriction-note");
+if(restrictionNote){
+restrictionNote.classList.toggle("is-visible", restrictedSet.size > 0);
+}
+});
+}
+
+function setBuilderValue(groupKey, value){
+const ageMode = getAgeMode(builderState.ageGroup || "");
+if(isBuilderOptionRestricted(groupKey, value, ageMode)){
+document.getElementById("status").textContent = ageMode === "child"
+? "That option is hidden for younger age groups. Use age-appropriate styling instead."
+: "That option is limited for teen builds to keep the prompt age-appropriate.";
+return;
+}
+if(multiSelectBuilderKeys.has(groupKey)){
+const currentValues = Array.isArray(builderState[groupKey]) ? [...builderState[groupKey]] : [];
+builderState[groupKey] = currentValues.includes(value)
+? currentValues.filter((item) => item !== value)
+: [...currentValues, value];
+}else{
+builderState[groupKey] = builderState[groupKey] === value ? "" : value;
+}
+enforceAgeSafetyOnBuilder();
+syncBuilderUI();
+updatePreview();
+}
+
+function buildBuilderGroups(){
+const container = document.getElementById("builderGroups");
+if(!container || container.childElementCount > 0) return;
+
+builderGroupsConfig.forEach((group) => {
+const card = document.createElement("div");
+card.className = "builder-card";
+card.dataset.builderGroup = group.key;
+
+const title = document.createElement("h3");
+title.textContent = group.label;
+card.appendChild(title);
+
+if(multiSelectBuilderKeys.has(group.key)){
+const note = document.createElement("p");
+note.className = "multi-note";
+note.textContent = "Multi option section: choose one or more.";
+card.appendChild(note);
+}
+
+const restrictionNote = document.createElement("p");
+restrictionNote.className = "restriction-note";
+restrictionNote.textContent = "Some options are limited for younger age groups to keep prompts age-appropriate.";
+card.appendChild(restrictionNote);
+
+const choices = document.createElement("div");
+choices.className = "builder-choices";
+
+group.options.forEach((option) => {
+const button = document.createElement("button");
+button.type = "button";
+button.className = "builder-chip";
+button.textContent = option;
+button.dataset.value = option;
+button.addEventListener("click", () => setBuilderValue(group.key, option));
+choices.appendChild(button);
+});
+
+card.appendChild(choices);
+
+const addRow = document.createElement("div");
+addRow.className = "builder-add";
+
+const input = document.createElement("input");
+input.type = "text";
+input.placeholder = "Add your own...";
+
+const addButton = document.createElement("button");
+addButton.type = "button";
+addButton.className = "secondary";
+addButton.textContent = "+ Add";
+addButton.addEventListener("click", () => {
+const value = input.value.trim();
+if(!value) return;
+setBuilderValue(group.key, value);
+input.value = "";
+});
+input.addEventListener("keydown", (event) => {
+if(event.key === "Enter"){
+event.preventDefault();
+addButton.click();
+}
+});
+
+addRow.appendChild(input);
+addRow.appendChild(addButton);
+card.appendChild(addRow);
+container.appendChild(card);
+});
+
+syncBuilderUI();
+}
+
+function buildInstantVibes(){
+const container = document.getElementById("vibeGrid");
+if(!container || container.childElementCount > 0) return;
+
+const vibeBuilderKeys = ["cartoonStyleBuilder","ageGroup","bodyType","outfitBuilder","shoesBuilder","accessoriesBuilder","jewelryDetails","poseAction","typography","eyeStyleEffects"];
+
+instantVibes.forEach((vibe) => {
+const button = document.createElement("button");
+button.type = "button";
+button.className = "vibe-card";
+button.dataset.vibeKey = vibe.key;
+button.innerHTML =
+"<span class=\"vibe-emoji\">" + vibe.emoji + "</span>" +
+"<span class=\"vibe-title\">" + vibe.title + "</span>" +
+"<span class=\"vibe-subtitle\">" + vibe.subtitle + "</span>";
+button.addEventListener("click", () => {
+const isSameVibe = activeVibe === vibe.title;
+activeVibe = isSameVibe ? "" : vibe.title;
+document.getElementById("mood").value = isSameVibe ? "None" : vibe.mood;
+document.getElementById("renderMode").value = isSameVibe ? "None" : vibe.renderMode;
+document.getElementById("style").value = isSameVibe ? "None" : vibe.style;
+document.getElementById("bg").value = isSameVibe ? "None" : vibe.bg;
+vibeBuilderKeys.forEach((key) => {
+builderState[key] = multiSelectBuilderKeys.has(key) ? [] : "";
+});
+if(!isSameVibe && vibe.builder){
+Object.entries(vibe.builder).forEach(([key, value]) => {
+builderState[key] = Array.isArray(value) ? [...value] : value;
+});
+}
+enforceAgeSafetyOnBuilder();
+syncBuilderUI();
+document.querySelectorAll(".vibe-card").forEach((card) => {
+card.classList.toggle("is-active", !isSameVibe && card.dataset.vibeKey === vibe.key);
+});
+updatePreview();
+document.getElementById("status").textContent = isSameVibe ? "Instant vibe removed." : "Instant vibe applied: " + vibe.title + ".";
+});
+container.appendChild(button);
+});
+}
+
+function builderSelectionsToText(builder){
+return Object.entries(builder)
+.filter(([, value]) => Array.isArray(value) ? value.length : value)
+.map(([key, value]) => {
+const label = builderGroupsConfig.find((group) => group.key === key)?.label || key;
+return label.toLowerCase() + ": " + displayBuilderValue(value);
+})
+.join(", ");
+}
+
+function getSelections(){
+const genderValue = getBuilderValue("genderBuilder");
+const poseValue = getBuilderValue("poseAction");
+const hairColorValue = getBuilderValue("hairColor");
+const hairStyleValue = getBuilderValue("hairStyleBuilder");
+const hairValue = [hairColorValue, hairStyleValue].filter(Boolean).join(" ");
+const outfitValue = getBuilderValue("outfitBuilder");
+const shoesValue = getBuilderValue("shoesBuilder");
+const accessoriesValue = getJoinedBuilderValues(["accessoriesBuilder","jewelryDetails"]);
+const detailValue = getJoinedBuilderValues(["eyeColor","eyeStyleEffects","facialFeatures","makeupStyle","expressionMood","tattoosBodyArt","specialNeed","typography"]);
+
+return {
+ratio:getValue("ratio"),
+style:getValue("style"),
+renderMode:getValue("renderMode"),
+bg:getValue("bg"),
+lighting:getValue("lighting"),
+camera:getValue("camera"),
+mood:getValue("mood"),
+gender:genderValue ? genderValue.charAt(0).toUpperCase() + genderValue.slice(1) : "None",
+pose:poseValue,
+hair:hairValue,
+outfit:outfitValue,
+shoes:shoesValue,
+accessories:accessoriesValue,
+details:detailValue,
+customOptions:getValue("customOptions"),
+builder:{ ...builderState }
+};
+}
+
+function listParts(parts){
+const filtered = parts.filter(Boolean);
+if(filtered.length === 0) return "";
+if(filtered.length === 1) return filtered[0];
+if(filtered.length === 2) return filtered[0] + " and " + filtered[1];
+return filtered.slice(0, -1).join(", ") + ", and " + filtered[filtered.length - 1];
+}
+
+const childLikeAgeGroups = new Set(["baby","toddler","child","preteen"]);
+const teenAgeGroups = new Set(["adolescent","teenager"]);
+const matureBodyTypeOptions = new Set(["slim thick","thick sexy","curvy","plus-size"]);
+const matureOutfitFallbacks = new Map([
+["glam streetwear","casual streetwear"],
+["sparkly mini dress","cute dress"],
+["crop top with cargo pants","coordinated casual outfit"],
+["sequined cocktail dress","party outfit"],
+["velvet bodycon dress","velvet dress"],
+["silk slip dress with blazer","dress with blazer"],
+["thigh high boots","boots"]
+]);
+const youthBlockedPhrases = [
+/sexy/gi,
+/seductive/gi,
+/sultry/gi,
+/wet gloss lips?/gi,
+/hourglass/gi,
+/small waist(line)?/gi,
+/fuller hips?( and thighs)?/gi,
+/bodycon/gi,
+/polished manicure detail/gi,
+/manicure/gi,
+/glam bold lips?/gi,
+/smokey eye/gi,
+/cut crease/gi,
+/dramatic cat eye/gi,
+/nude lips with highlight/gi,
+/glitter lip gloss/gi,
+/bronzed sun-kissed glow/gi,
+/contoured cheekbones/gi,
+/pouting glam lips?/gi
+];
+
+function getAgeMode(ageGroup){
+if(childLikeAgeGroups.has(ageGroup)) return "child";
+if(teenAgeGroups.has(ageGroup)) return "teen";
+return "adult";
+}
+
+function sanitizeYouthFreeform(text, ageMode){
+if(!text) return "";
+if(ageMode === "adult") return text;
+let result = text;
+youthBlockedPhrases.forEach((pattern) => {
+result = result.replace(pattern, "");
+});
+return result.replace(/\s*,\s*,/g, ", ").replace(/\s{2,}/g, " ").replace(/^,\s*|\s*,\s*$/g, "").trim();
+}
+
+function getSafeBodyType(bodyType, ageMode){
+if(!bodyType) return "";
+if(ageMode === "adult") return bodyType;
+if(ageMode === "child") return ["small and cute","tiny","round and soft"].includes(bodyType) ? bodyType : "age-appropriate child proportions";
+return matureBodyTypeOptions.has(bodyType) ? "age-appropriate teen proportions" : bodyType;
+}
+
+function getSafeOutfit(outfit, ageMode){
+if(!outfit) return "";
+if(ageMode === "adult") return outfit;
+if(matureOutfitFallbacks.has(outfit)) return matureOutfitFallbacks.get(outfit);
+return outfit;
+}
+
+function getSafeMultiSelect(values, blockedValues, ageMode){
+if(!Array.isArray(values)) return [];
+if(ageMode === "adult") return values;
+return values.filter((value) => !blockedValues.has(value));
+}
+
+function getSafeStyle(style, ageMode){
+if(!style || style === "None" || ageMode === "adult") return style;
+const replacements = {
+"Glossy chibi luxury":"Glossy chibi style",
+"Luxury doll render":"Polished doll render",
+"Neon glam chibi":"Neon chibi style",
+"High fashion chibi":"Stylized fashion chibi"
+};
+return replacements[style] || style;
+}
+
+function getSafeRenderMode(renderMode, ageMode){
+if(!renderMode || renderMode === "None" || ageMode === "adult") return renderMode;
+const replacements = {
+"Ultra-editorial beauty":"Polished character portrait",
+"Street-lux campaign":"Street-style character campaign",
+"High-gloss studio campaign":"Polished studio render",
+"Luxury product-ad poster":"Poster-style character layout",
+"Fashion magazine cover":"Magazine-inspired cover layout",
+"Cinematic glam portrait":"Cinematic character portrait"
+};
+return replacements[renderMode] || renderMode;
+}
+
+function getSafeShoes(shoes, ageMode){
+if(!shoes || ageMode === "adult") return shoes;
+const replacements = {
+"stiletto heels":"dress shoes",
+"blinged heels":"dress shoes",
+"open toe sandals":"sandals",
+"thigh high boots":"boots"
+};
+return replacements[shoes] || shoes;
+}
+
+function getSafePose(pose, ageMode){
+if(!pose || ageMode === "adult") return pose;
+const replacements = {
+"hand on hip":"standing pose",
+"walking with attitude":"walking pose",
+"blowing a kiss":"smiling pose",
+"taking selfie":"holding a pose"
+};
+return replacements[pose] || pose;
+}
+
+function getSafeTypography(values, ageMode){
+if(!Array.isArray(values) || ageMode === "adult") return values || [];
+const replacements = {
+"luxury script text":"playful script text",
+"bold editorial headline":"bold title text",
+"handwritten glam text":"handwritten text",
+"runway magazine typography":"magazine-style text",
+"gold foil text":"bright title text",
+"glossy chrome lettering":"glossy lettering"
+};
+return values.map((value) => replacements[value] || value);
+}
+
+function getSafeJewelry(values, ageMode){
+if(!Array.isArray(values) || ageMode === "adult") return values || [];
+const blocked = ageMode === "child"
+? new Set(["body chains","nose ring","choker necklace","multiple rings","diamond studs","statement earrings","delicate necklaces","anklets"])
+: new Set(["body chains","nose ring"]);
+return values.filter((value) => !blocked.has(value));
+}
+
+function buildPrompt(data){
+const cartoonType = data.builder.cartoonStyleBuilder || "";
+const ageGroup = data.builder.ageGroup || "";
+const ageMode = getAgeMode(ageGroup);
+const childMode = ageMode === "child";
+const teenMode = ageMode === "teen";
+const youthMode = ageMode !== "adult";
+const comicMode = cartoonType === "graphic comic illustration";
+const coloringMode = cartoonType === "coloring page image";
+const animeMode = cartoonType === "anime style illustration";
+const fashionDollMode = ["fashion doll inspired","hyper realistic fashion doll","chibi mixed with fashion doll","semi realism 4k fashion doll style"].includes(cartoonType);
+const painterlyMode = ["gouache mixed with watercolor","hand-drawn cartoon","retro vintage cartoon"].includes(cartoonType);
+const threeDMode = ["cgi caricature","glossy 3d chibi illustration","stylized animated film 3d render"].includes(cartoonType);
+const illustrationMode = ["18k digital illustration","hyper realistic illustration"].includes(cartoonType);
+const highGlossMode = cartoonType === "high gloss chibi";
+const safeStyle = getSafeStyle(data.style, ageMode);
+const safeRenderMode = getSafeRenderMode(data.renderMode, ageMode);
+const safeShoes = getSafeShoes(data.shoes, ageMode);
+const safePose = getSafePose(data.pose, ageMode);
+const safeHair = data.hair || "";
+const safeOutfit = getSafeOutfit(data.outfit, ageMode);
+const safeBodyType = getSafeBodyType(data.builder.bodyType, ageMode);
+const safeDetails = sanitizeYouthFreeform(data.details, ageMode);
+const safeCustomOptions = sanitizeYouthFreeform(data.customOptions, ageMode);
+const safeMakeup = childMode ? [] : getSafeMultiSelect(data.builder.makeupStyle, new Set(["glam bold lips","smokey eye","cut crease","dramatic cat eye","nude lips with highlight","glitter lip gloss","bronzed sun-kissed glow","contoured cheekbones"]), ageMode);
+const safeFacialFeatures = getSafeMultiSelect(data.builder.facialFeatures, new Set(["pouting glam lips"]), ageMode);
+const safeAccessories = data.builder.accessoriesBuilder || [];
+const safeJewelry = getSafeJewelry(data.builder.jewelryDetails, ageMode);
+const safeTypography = getSafeTypography(data.builder.typography, ageMode);
+const safeBuilder = { ...data.builder, bodyType: safeBodyType, makeupStyle: safeMakeup, facialFeatures: safeFacialFeatures, accessoriesBuilder: safeAccessories, jewelryDetails: safeJewelry, typography: safeTypography };
+const animeHairMode = safeHair.toLowerCase().includes("anime hair");
+let prompt = comicMode
+? "graphic comic character illustration, exaggerated chibi proportions, full body, no cropping, visible feet, centered subject, dynamic illustrated composition, oversized chibi head, stylized body proportions"
+: coloringMode
+? "coloring page character design, exaggerated chibi proportions, full body, no cropping, visible feet, centered subject, oversized chibi head, simple clean composition"
+: animeMode
+? "anime character illustration, exaggerated chibi proportions, full body, no cropping, visible feet, centered subject, clean anime composition, oversized anime-inspired chibi head, stylized 2D character design"
+: fashionDollMode
+? "fashion doll character illustration, exaggerated fashionable proportions, full body, no cropping, visible feet, centered subject, doll-like face design, trend-driven fashion composition"
+: painterlyMode
+? "illustrated character artwork, stylized painted character design, full body, no cropping, visible feet, centered subject, handcrafted illustrated composition"
+: threeDMode
+? "stylized 3D character render, full body, no cropping, visible feet, centered subject, dimensional cartoon design, rounded sculpted character forms"
+: illustrationMode
+? "high-detail illustrated character portrait, full body, no cropping, visible feet, centered subject, polished illustrated composition, refined character drawing"
+: highGlossMode
+? "high gloss chibi character render, full body, no cropping, visible feet, centered subject, collectible figure styling, polished toy-like proportions"
+: youthMode
+? "stylized exaggerated chibi character, ultra-detailed polished render, full body head to toe, no cropping, visible feet, centered subject, clean balanced composition, oversized exaggerated chibi head, cute stylized proportions"
+: "hyper-realistic glossy exaggerated chibi character, ultra-detailed polished render, full body head to toe, no cropping, visible feet, centered subject, clean balanced composition, oversized exaggerated chibi head, stylized sculpted body, doll-like finish";
+let renderModePrompt = "";
+let cartoonTypePrompt = "";
+const polishedStyleOverride = ", polished styling, refined fashion look, premium finish, graceful visual language, campaign-ready energy";
+const masculineStyleOverride = ", polished masculine styling, handsome not feminine, sharp jawline, confident masculine look, refined menswear presence";
+
+if(data.ratio !== "None") prompt += ", aspect ratio " + data.ratio;
+if(safeStyle && safeStyle !== "None") prompt += ", " + safeStyle;
+if(safeRenderMode && safeRenderMode !== "None") prompt += ", " + safeRenderMode;
+if(data.bg !== "None") prompt += ", background set in a " + data.bg;
+if(data.lighting !== "None") prompt += ", " + data.lighting + " lighting";
+if(data.camera !== "None") prompt += ", " + data.camera + " camera framing";
+if(data.mood !== "None") prompt += ", " + data.mood.toLowerCase() + " mood";
+if(data.gender !== "None") prompt += ", " + data.gender;
+if(ageGroup) prompt += ", " + ageGroup;
+if(childMode){
+prompt += ", wholesome age-appropriate child styling, child-friendly design";
+}else if(teenMode){
+prompt += ", age-appropriate teen styling, polished but natural character design";
+}
+if(safeBodyType){
+if(safeBodyType === "thick sexy"){
+prompt += ", thick sexy body type, small waistline, fuller hips, sculpted curvy silhouette";
+}else if(safeBodyType === "slim thick"){
+prompt += ", slim thick body type, slim waistline, fuller hips and thighs, sculpted hourglass silhouette";
+}else{
+prompt += ", " + safeBodyType + " body type";
+}
+}
+if(safeHair){
+if(animeHairMode){
+prompt += ", anime hair, stylized pointed hair strands, defined clumped bangs, gravity-defying anime shape language";
+}else{
+prompt += ", " + safeHair + " hairstyle";
+}
+}
+if(safeOutfit) prompt += ", wearing " + safeOutfit;
+if(safeShoes) prompt += ", " + safeShoes;
+if(data.accessories) prompt += ", styled with " + data.accessories;
+if(safePose) prompt += ", " + safePose;
+if(safeDetails) prompt += ", signature details: " + safeDetails;
+if(safeCustomOptions) prompt += ", additional options: " + safeCustomOptions;
+const builderText = builderSelectionsToText(safeBuilder);
+if(builderText) prompt += ", builder selections: " + builderText;
+
+if(safeBuilder.hairColor) prompt += ", " + safeBuilder.hairColor + " hair color";
+if(safeBuilder.eyeColor) prompt += ", " + safeBuilder.eyeColor + " eyes";
+if(safeBuilder.typography && safeBuilder.typography.length){
+prompt += ", typography styled as " + safeBuilder.typography + ", large prominent text treatment, bigger readable lettering, strong title presence, text placed away from the character, never covering the face or body, clean readable placement in open negative space only";
+prompt += ", subject scaled larger in frame, stronger character presence, bigger visual read";
+}
+if(cartoonType){
+cartoonTypePrompt = cartoonTypePrompts[cartoonType] || ", " + cartoonType;
+}
+
+if(safeRenderMode === "Toy-box render"){
+renderModePrompt = ", premium toy-box render, collector doll packaging energy, glossy molded finish, polished plastic shine, boxed-display perfection, adorable figurine realism";
+}else if(safeRenderMode === "Ultra-editorial beauty"){
+renderModePrompt = ", ultra-editorial beauty campaign, beauty-dish lighting, immaculate makeup detail, macro-level skin finish, glossy lips, magazine beauty spread, face-forward clarity";
+}else if(safeRenderMode === "Street-lux campaign"){
+renderModePrompt = ", street fashion campaign, urban branding, sporty designer styling, bold logo placement, campaign-grade edge, streetwear editorial energy";
+}else if(safeRenderMode === "Animated 3D doll realism"){
+renderModePrompt = ", animated 3D doll realism, CGI character finish, soft sculpted facial planes, ultra-smooth materials, cinematic 3D shading, animation-studio quality";
+}else if(safeRenderMode === "High-gloss studio campaign"){
+renderModePrompt = ", high-gloss studio campaign, clean seamless backdrop, precision studio reflections, commercial polish, clean ad-level finish";
+}else if(safeRenderMode === "Luxury product-ad poster"){
+renderModePrompt = ", product-ad poster, clean brand-style composition, hero lighting, polished marketing visual, poster-ready finish";
+}else if(safeRenderMode === "Fashion magazine cover"){
+renderModePrompt = ", fashion magazine cover aesthetic, cover-star pose, headline-ready composition, glossy fashion publication finish";
+}else if(safeRenderMode === "Cinematic glam portrait"){
+renderModePrompt = ", cinematic portrait, dramatic lighting, soft-focus background depth, elegant movie-poster framing, close-detail realism";
+}else if(safeRenderMode === "Polished character portrait"){
+renderModePrompt = ", polished character portrait, clean portrait framing, clear facial detail, balanced studio styling";
+}else if(safeRenderMode === "Street-style character campaign"){
+renderModePrompt = ", street-style character campaign, playful streetwear styling, clean urban composition, bold but friendly character energy";
+}else if(safeRenderMode === "Polished studio render"){
+renderModePrompt = ", polished studio render, clean seamless backdrop, balanced lighting, crisp polished finish";
+}else if(safeRenderMode === "Poster-style character layout"){
+renderModePrompt = ", poster-style character layout, clean focal composition, readable silhouette, polished character presentation";
+}else if(safeRenderMode === "Magazine-inspired cover layout"){
+renderModePrompt = ", magazine-inspired cover layout, cover-ready framing, clean type space, polished character presentation";
+}else if(safeRenderMode === "Cinematic character portrait"){
+renderModePrompt = ", cinematic character portrait, dramatic but clean lighting, focused character framing, polished movie-poster composition";
+}
+
+if(comicMode){
+prompt += ", high-contrast graphic palette, thick inked edges, graphic shadow shapes, cel-shaded planes, stylized facial features, halftone print texture, bold visual storytelling";
+prompt += ", simplified reflective detail, graphic fabric folds, strong silhouette read, illustrated panel contrast";
+}else if(animeMode){
+prompt += ", anime color palette, large expressive eyes, cel-shaded skin, clean line art, stylized facial proportions, simplified nose and mouth, dramatic anime silhouette, crisp 2D illustration finish";
+prompt += ", flat shaded fabric folds, clean highlight placement, stylized hair spikes and clumps, poster-like anime composition";
+}else if(fashionDollMode){
+prompt += ", fashion doll face proportions, oversized almond eyes, defined lashes, sleek doll-like skin finish, trendy fashion silhouette, stylized doll finish";
+prompt += ", clean glossy styling, polished doll materials, bold fashion attitude, sharp outfit read, statement accessories";
+}else if(painterlyMode){
+prompt += ", visible brush texture, illustrated surface variation, painterly edges, handcrafted artwork feel, softer material transitions, non-photographic painted finish";
+prompt += ", stylized color blending, artistic line treatment, illustration-first composition";
+}else if(threeDMode){
+prompt += ", dimensional 3D materials, rounded sculpted forms, studio-rendered depth, soft specular highlights, animated feature-quality surfaces, clean 3D silhouette";
+prompt += ", believable toy-like volume, cinematic rendered lighting, polished CGI character finish";
+}else if(illustrationMode){
+prompt += ", crisp illustrated detail, refined drawing precision, polished digital painting, clean edge control, non-photographic illustration finish";
+prompt += ", carefully rendered fabric and face detail, premium concept-art clarity";
+}else if(highGlossMode){
+prompt += ", lacquered gloss finish, shiny collectible character look, reflective polished surfaces, toy-like sheen, crisp highlight control";
+}else if(coloringMode){
+prompt += ", black and white only, thick clean outlines, bold contour lines, simplified facial features, empty fill spaces, no shading, printable coloring page layout";
+}else{
+prompt += youthMode
+? ", sunshine yellow, black, and white palette, bright expressive eyes, clean skin detail, neat hairline, soft healthy complexion, crisp face focus"
+: ", sunshine yellow, black, and white palette, smooth skin detail, glossy eyes with bright catchlights, neat hairline, defined lashes, radiant complexion, clean facial symmetry, razor-sharp focus on face";
+prompt += youthMode
+? ", soft fabric texture, clean folds, crisp shape definition, smooth illustrated finish"
+: ", high-shine materials, satin sheen, dimensional fabric folds, polished reflective surfaces";
+}
+prompt += cartoonTypePrompt;
+prompt += renderModePrompt;
+if(!comicMode && !coloringMode && !animeMode){
+prompt += youthMode ? ", polished character styling, playful visual language, clean readable design" : (data.gender === "Male" ? masculineStyleOverride : polishedStyleOverride);
+prompt += youthMode
+? ", bright contrast, soft glow, clean silhouette, balanced composition, child-friendly illustration energy"
+: ", rich contrast, luminous glow, clean silhouette, balanced composition, polished studio quality, stylish attitude";
+}else if(animeMode){
+prompt += ", expressive anime styling, clean silhouette, balanced illustration composition, stylized character energy";
+}
+if(fashionDollMode){
+prompt += ", no realistic human proportions, no understated eyes, no plain face structure";
+}
+if(painterlyMode){
+prompt += ", no photo-real skin, no glossy camera realism, no hard plastic finish";
+}
+if(threeDMode){
+prompt += ", no flat 2D drawing, no paper texture, no inked comic shading";
+}
+if(illustrationMode){
+prompt += ", no live-action photo look, no soft camera blur, no muddy paint";
+}
+if(highGlossMode){
+prompt += ", no matte surfaces, no rough paper texture, no flat cel shading";
+}
+prompt += youthMode
+? ", clean hands, natural fingers, age-appropriate pose, balanced anatomy, anatomically correct hands"
+: ", elegant realistic hands, beautiful symmetrical hands, clean fingers, naturally posed hands, polished manicure detail, anatomically correct hands";
+prompt += comicMode
+? ", no blurry painting, no soft airbrush realism, no muddy shading, no warped hands, no weird hands, no broken fingers, no fused fingers, no extra fingers, no missing fingers, no extra limbs, no cut off shoes, no distorted face"
+: animeMode
+? ", no photo-real skin, no idol photography look, no k-pop beauty look, no soft airbrush glam realism, no live-action face, no muddy shading, no warped hands, no weird hands, no broken fingers, no fused fingers, no extra fingers, no missing fingers, no extra limbs, no cut off shoes, no distorted face"
+: coloringMode
+? ", no grayscale shading, no painted texture, no filled color areas, no warped hands, no weird hands, no broken fingers, no fused fingers, no extra fingers, no missing fingers, no extra limbs, no cut off shoes, no distorted face"
+: ", no blur, no low detail, no warped hands, no weird hands, no broken fingers, no fused fingers, no extra fingers, no missing fingers, no extra limbs, no cut off shoes, no distorted face, no messy background";
+return prompt;
+}
+
+function buildVideoScript(data){
+const ageMode = getAgeMode(data.builder.ageGroup || "");
+const mood = data.mood !== "None" ? data.mood.toLowerCase() : "confident";
+const lighting = data.lighting !== "None" ? data.lighting.toLowerCase() : "soft luxe";
+const camera = data.camera !== "None" ? data.camera.toLowerCase() : "full body front";
+const bg = data.bg !== "None" ? data.bg.toLowerCase() : "clean studio set";
+const outfit = getSafeOutfit(data.outfit, ageMode) || (ageMode === "adult" ? "styled outfit" : "age-appropriate outfit");
+const detail = sanitizeYouthFreeform(data.details, ageMode) || (ageMode === "adult" ? "clean texture and styling details" : "playful details");
+const customDetails = sanitizeYouthFreeform(data.customOptions, ageMode);
+const custom = customDetails ? " with extra direction for " + customDetails : "";
+const angle = ageMode === "adult"
+? (data.gender === "Male" ? "a crisp handsome hero angle" : "a crisp polished portrait angle")
+: "a clean character-focused angle";
+
+return "0 to 3 seconds: Open on a " + camera + " shot in a " + bg + " as " + lighting + " light begins to glow across the scene. 3 to 7 seconds: The character steps into frame wearing " + outfit + ", showing glossy textures, rich color contrast, and polished movement. 7 to 11 seconds: The camera drifts in to catch " + detail + custom + " and lands on " + angle + ". 11 to 15 seconds: The final pose hits with " + mood + " energy while the styling, shoes, and accessories remain fully visible. Voiceover: This is polished exaggerated chibi style.";
+}
+
+function buildSummary(data){
+const ageMode = getAgeMode(data.builder.ageGroup || "");
+const descriptors = [
+data.style !== "None" ? data.style : (data.builder.cartoonStyleBuilder || "glossy luxury styling"),
+getSafeOutfit(data.outfit, ageMode) ? getSafeOutfit(data.outfit, ageMode) : (ageMode === "adult" ? "styled fashion look" : "age-appropriate outfit"),
+data.bg !== "None" ? data.bg : "editorial backdrop"
+];
+if(data.gender === "Male"){
+return ageMode === "adult"
+? "A polished handsome " + listParts(descriptors) + " male character with " + (data.hair || data.builder.hairStyleBuilder || "polished masculine grooming") + ", " + (data.accessories || "statement accessories") + ", glossy rendering, and a " + ((data.mood !== "None" ? data.mood : "confident").toLowerCase()) + " strong refined aura."
+: "A polished " + listParts(descriptors) + " male character with " + (data.hair || data.builder.hairStyleBuilder || "stylized hair") + ", " + (data.accessories || "simple accessories") + ", clean rendering, and a " + ((data.mood !== "None" ? data.mood : "confident").toLowerCase()) + " expressive energy.";
+}
+return ageMode === "adult"
+? "A polished " + listParts(descriptors) + " character with " + (data.hair || data.builder.hairStyleBuilder || "polished hair") + ", " + (data.accessories || "statement accessories") + ", glossy rendering, and a " + ((data.mood !== "None" ? data.mood : "confident").toLowerCase()) + " poised aura."
+: "A polished " + listParts(descriptors) + " character with " + (data.hair || data.builder.hairStyleBuilder || "stylized hair") + ", " + (data.accessories || "simple accessories") + ", clean rendering, and a " + ((data.mood !== "None" ? data.mood : "confident").toLowerCase()) + " playful aura.";
+}
+
+function buildName(data){
+const moodWord = data.mood !== "None" ? data.mood : "Golden";
+const styleWord = data.renderMode !== "None" ? data.renderMode.split(" ")[0] : (data.style !== "None" ? data.style.split(" ")[0] : "Luxe");
+const bgWord = data.bg !== "None" ? data.bg.split(" ")[0] : "Muse";
+return moodWord + " " + styleWord + " " + bgWord;
+}
+
+function updatePromptChips(data){
+const chips = [];
+if(data.ratio !== "None") chips.push(data.ratio);
+if(data.style !== "None") chips.push(data.style);
+if(data.renderMode !== "None") chips.push(data.renderMode);
+if(data.bg !== "None") chips.push(data.bg);
+if(data.lighting !== "None") chips.push(data.lighting);
+if(data.camera !== "None") chips.push(data.camera);
+if(data.mood !== "None") chips.push(data.mood);
+if(data.pose) chips.push(data.pose);
+Object.values(data.builder)
+.map((value) => displayBuilderValue(value))
+.filter(Boolean)
+.slice(0, 4)
+.forEach((value) => chips.push(value));
+
+const container = document.getElementById("promptChips");
+container.innerHTML = chips.length ? chips.map((chip) => "<span class=\"chip\">" + chip + "</span>").join("") : "<span class=\"chip\">Add styling choices to populate tags</span>";
+}
+
+function updateSelectedOptions(data){
+const optionPairs = [
+["Vibe", activeVibe],
+["Gender", data.gender !== "None" ? data.gender : ""],
+["Pose", data.pose],
+["Hair", data.hair],
+["Outfit", data.outfit],
+["Shoes", data.shoes],
+["Accessories", data.accessories],
+["Details", data.details],
+["Ratio", data.ratio !== "None" ? data.ratio : ""],
+["Style", data.style !== "None" ? data.style : ""],
+["Render", data.renderMode !== "None" ? data.renderMode : ""],
+["Background", data.bg !== "None" ? data.bg : ""],
+["Lighting", data.lighting !== "None" ? data.lighting : ""],
+["Camera", data.camera !== "None" ? data.camera : ""],
+["Mood", data.mood !== "None" ? data.mood : ""],
+["Extra", data.customOptions]
+];
+
+builderGroupsConfig.forEach((group) => {
+optionPairs.push([group.label, displayBuilderValue(data.builder[group.key])]);
+});
+
+const activeOptions = optionPairs.filter(([, value]) => value);
+const container = document.getElementById("selectedOptions");
+
+container.innerHTML = activeOptions.length
+? activeOptions.map(([label, value]) => "<div class=\"option-pill\"><strong>" + label + ":</strong> <span>" + value + "</span></div>").join("")
+: "<div class=\"option-empty\">Your chosen and typed options will appear here.</div>";
+}
+
+function updatePreview(){
+const data = getSelections();
+document.getElementById("previewName").textContent = buildName(data);
+document.getElementById("previewSummary").textContent = buildSummary(data);
+
+const tags = [];
+if(data.outfit) tags.push(data.outfit);
+if(data.shoes) tags.push(data.shoes);
+if(data.accessories) tags.push(data.accessories);
+if(data.details) tags.push(data.details);
+if(data.customOptions) tags.push(data.customOptions);
+Object.values(data.builder)
+.map((value) => displayBuilderValue(value))
+.filter(Boolean)
+.slice(0, 2)
+.forEach((value) => tags.push(value));
+if(data.lighting !== "None") tags.push(data.lighting);
+
+const tagBox = document.getElementById("previewTags");
+tagBox.innerHTML = tags.length ? tags.slice(0, 5).map((tag) => "<span class=\"tag\">" + tag + "</span>").join("") : "<span class=\"tag\">No selections yet</span>";
+
+const mood = data.mood !== "None" ? data.mood.toLowerCase() : "soft glam";
+const camera = data.camera !== "None" ? data.camera.toLowerCase() : "front-facing";
+document.getElementById("previewPulse").textContent = mood + " energy with a " + camera + " editorial presence.";
+
+updatePromptChips(data);
+updateSelectedOptions(data);
+}
+
+function generate(){
+const data = getSelections();
+document.getElementById("output").value = buildPrompt(data);
+document.getElementById("video").value = buildVideoScript(data);
+document.getElementById("status").textContent = "Base prompt generated and synced to the preview.";
+updatePreview();
+}
+
+function randomItem(items){
+return items[Math.floor(Math.random() * items.length)];
+}
+
+function randomize(){
+const makeupOptions = builderGroupsConfig.find((group) => group.key === "makeupStyle")?.options || [];
+const facialOptions = builderGroupsConfig.find((group) => group.key === "facialFeatures")?.options || [];
+const firstDetail = makeupOptions.length ? randomItem(makeupOptions) : "";
+const secondDetail = facialOptions.length ? randomItem(facialOptions) : "";
+
+document.getElementById("ratio").value = randomItem(["1:1","4:5","9:16","16:9"]);
+document.getElementById("style").value = randomItem(styles);
+document.getElementById("renderMode").value = randomItem(renderModes);
+document.getElementById("bg").value = randomItem(bgs);
+document.getElementById("lighting").value = randomItem(lights);
+document.getElementById("camera").value = randomItem(cameras);
+document.getElementById("mood").value = randomItem(moods);
+builderGroupsConfig.forEach((group) => {
+if(multiSelectBuilderKeys.has(group.key)){
+const firstPick = randomItem(group.options);
+const remainingOptions = group.options.filter((option) => option !== firstPick);
+builderState[group.key] = remainingOptions.length ? [firstPick, randomItem(remainingOptions)] : [firstPick];
+}else{
+builderState[group.key] = randomItem(group.options);
+}
+});
+builderState.makeupStyle = firstDetail ? [firstDetail] : [];
+builderState.facialFeatures = secondDetail ? [secondDetail] : [];
+enforceAgeSafetyOnBuilder();
+syncBuilderUI();
+generate();
+document.getElementById("status").textContent = "Random luxury concept generated.";
+}
+
+function variations(){
+const base = document.getElementById("output").value.trim();
+if(!base){
+generate();
+}
+
+const freshBase = document.getElementById("output").value.trim();
+if(!freshBase) return;
+
+const data = getSelections();
+const ageMode = getAgeMode(data.builder.ageGroup || "");
+const mood = data.mood !== "None" ? data.mood.toLowerCase() : "confident";
+const cartoonType = data.builder.cartoonStyleBuilder || "stylized cartoon";
+const v1 = ageMode === "adult"
+? freshBase + ", alternate version, keep the " + cartoonType + " look consistent, sharper pose, intensified " + mood + " facial expression, brighter catchlights, stronger hand detail, elegant realistic hands, perfect finger separation"
+: freshBase + ", alternate version, keep the " + cartoonType + " look consistent, clearer pose, brighter expression, stronger face clarity, cleaner hand detail, natural finger separation";
+const v2 = ageMode === "adult"
+? freshBase + ", alternate version, keep the " + cartoonType + " styling clear, dramatic angle, stronger shape language, bolder accessories, polished finish, beautiful hands"
+: freshBase + ", alternate version, keep the " + cartoonType + " styling clear, playful angle, stronger shape language, clearer accessories, polished illustration finish, clean hands";
+const v3 = ageMode === "adult"
+? freshBase + ", alternate version, keep the " + cartoonType + " identity unmistakable, premium scene polish, elegant hand pose, crystal-clear face detail, flawless shoe visibility, anatomically correct hands, no weird fingers"
+: freshBase + ", alternate version, keep the " + cartoonType + " identity unmistakable, crisp scene polish, natural hand pose, clear face detail, visible shoes, anatomically correct hands, no weird fingers";
+
+document.getElementById("output").value = [freshBase, v1, v2, v3].join("\n\n");
+document.getElementById("status").textContent = "Base prompt expanded into 3 styled variations.";
+}
+
+function clearAll(){
+activeVibe = "";
+builderGroupsConfig.forEach((group) => {
+builderState[group.key] = multiSelectBuilderKeys.has(group.key) ? [] : "";
+});
+document.querySelectorAll("select").forEach((select) => {
+select.selectedIndex = 0;
+});
+document.querySelectorAll("input").forEach((input) => {
+input.value = "";
+});
+document.getElementById("customOptions").value = "";
+document.getElementById("output").value = "";
+document.getElementById("video").value = "";
+document.getElementById("status").textContent = "Cleared. Ready for a fresh build.";
+document.querySelectorAll(".builder-card").forEach((card) => {
+card.querySelectorAll(".builder-chip").forEach((button) => button.classList.remove("is-active"));
+card.querySelectorAll("input").forEach((input) => input.value = "");
+});
+document.querySelectorAll(".vibe-card").forEach((card) => card.classList.remove("is-active"));
+syncBuilderUI();
+updatePreview();
+}
+
+async function copyFromField(fieldId, label){
+const field = document.getElementById(fieldId);
+if(!field || !field.value.trim()) return;
+
+try{
+if(navigator.clipboard && window.isSecureContext){
+await navigator.clipboard.writeText(field.value);
+document.getElementById("status").textContent = label + " copied to clipboard.";
+return;
+}
+}catch(error){
+console.warn("Modern clipboard copy failed, trying field selection fallback.", error);
+}
+
+try{
+field.focus();
+field.select();
+field.setSelectionRange(0, field.value.length);
+const copied = document.execCommand("copy");
+if(copied){
+document.getElementById("status").textContent = label + " copied to clipboard.";
+return;
+}
+throw new Error("execCommand copy failed");
+}catch(error){
+console.error("Clipboard copy failed:", error);
+field.focus();
+field.select();
+field.setSelectionRange(0, field.value.length);
+try{
+window.prompt("Copy the " + label.toLowerCase() + " below:", field.value);
+document.getElementById("status").textContent = "Clipboard was blocked, so a manual copy window was opened.";
+}catch(promptError){
+console.error("Manual copy prompt failed:", promptError);
+document.getElementById("status").textContent = "Copy was blocked. The " + label.toLowerCase() + " text is selected so you can copy it manually.";
+}
+}
+}
+
+function copyPrompt(){
+copyFromField("output", "Prompt");
+}
+
+function copyVideo(){
+copyFromField("video", "Video script");
+}
+
+fieldIds.forEach((id) => {
+document.getElementById(id).addEventListener("input", updatePreview);
+document.getElementById(id).addEventListener("change", updatePreview);
+});
+
+buildVisualPickers();
+buildBuilderGroups();
+buildInstantVibes();
+updatePreview();
+</script>
+
+</body>
+</html>
