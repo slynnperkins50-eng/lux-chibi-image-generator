@@ -6,7 +6,7 @@ The Lux Chibi Image Generator is a browser-based prompt builder designed to help
 
 This generator is designed for users who want a guided way to build prompts for:
 
-stylized chibi characters
+Stylized chibi characters
 cartoon-inspired character art
 glossy character renders
 coloring page prompts
